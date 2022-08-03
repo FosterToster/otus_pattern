@@ -1,3 +1,4 @@
+pub mod dyn_impl;
 pub mod static_impl;
 
 #[cfg(test)]
