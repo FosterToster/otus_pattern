@@ -1,8 +1,7 @@
-use otus_pattern::static_impl::traits::{CompositeLeaf, CompositeItem};
+use otus_pattern::static_impl::traits::{CompositeItem, CompositeLeaf};
 use otus_pattern::static_impl::types::{Paragraph, Sentence};
 
 fn main() {
-
     let article = Paragraph(vec![
         CompositeItem::Leaf(Sentence("Static implementation".to_string())),
         CompositeItem::Container(Paragraph(vec![
