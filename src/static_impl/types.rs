@@ -1,51 +1,38 @@
-use super::traits::{ArticleItem, ItemContainer};
+use super::traits::{CompositeItem, CompositeContainer, CompositeLeaf};
 use std::vec::Vec;
 
 pub struct Sentence(pub String);
 
-impl ArticleItem for Sentence {
-    fn get_text(&self) -> String {
+impl CompositeLeaf for Sentence {
+    type Return = String;
+    
+    fn operation(&self) -> Self::Return {
         self.0.clone()
     }
 }
 
-pub struct Paragraph<T>(pub Vec<T>);
+pub struct Paragraph(pub Vec<CompositeItem<Sentence, Self, String>>);
 
-impl<T: ArticleItem> ArticleItem for Paragraph<T> {
-    fn get_text(&self) -> String {
-        self.0.iter().fold(String::new(), |r, member| {
-            format!("{}\n{}", r, member.get_text())
-        })
+
+impl CompositeLeaf for Paragraph {
+    type Return = String;
+    
+    fn operation(&self) -> Self::Return {
+        self.0.iter()
+            .fold(
+                String::new(),
+                |r, cur| {
+                    format!("{}{}", r, match cur {
+                        CompositeItem::Leaf(sentence) => format!("{}\n",sentence.operation()),
+                        CompositeItem::Container(container) => format!("\n{}", container.operation())
+                    })
+                })            
     }
 }
 
-impl<T: ArticleItem> ItemContainer<T> for Paragraph<T> {
-    fn append_item(&mut self, item: T) {
-        self.0.push(item)
-    }
-}
-
-pub struct Article<T> {
-    header: String,
-    members: Vec<T>,
-}
-
-impl<T> Article<T> {
-    pub fn new(header: String, members: Vec<T>) -> Self {
-        Self { header, members }
-    }
-}
-
-impl<T: ArticleItem> ArticleItem for Article<T> {
-    fn get_text(&self) -> String {
-        format!(
-            "{}\n{}",
-            self.header,
-            self.members.iter().fold(String::new(), |r, member| format!(
-                "{}\n{}",
-                r,
-                member.get_text()
-            ))
-        )
+impl CompositeContainer<Sentence, Paragraph, String> for Paragraph {
+    
+    fn append_item(&mut self, member: CompositeItem<Sentence, Paragraph, String>) {
+        self.0.push(member)
     }
 }

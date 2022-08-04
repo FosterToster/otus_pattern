@@ -1,9 +1,13 @@
-pub trait ArticleItem {
-    fn get_text(&self) -> String;
+pub trait CompositeLeaf {
+    type Return;
+    fn operation(&self) -> Self::Return;
 }
 
-pub trait ItemContainer<T> {
-    fn append_item(&mut self, item: T);
+pub trait CompositeContainer<L: CompositeLeaf<Return = RSLT>, C: CompositeContainer<L, C, L::Return>, RSLT>: CompositeLeaf {
+    fn append_item(&mut self, member: CompositeItem<L, C, RSLT>);
 }
 
-pub trait ArticleItemContainer<T: ArticleItem>: ArticleItem + ItemContainer<T> {}
+pub enum CompositeItem<L: CompositeLeaf<Return = RSLT>, C: CompositeContainer<L, C, L::Return>, RSLT> {
+    Leaf(L),
+    Container(C)
+}
